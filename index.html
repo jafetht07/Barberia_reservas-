@@ -34,54 +34,6 @@
       </div>
     </div>
 
-    <!-- PANEL DE DIAGNÓSTICO -->
-    <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-xl p-5 mb-6 shadow-lg border-2 border-blue-600">
-      <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        Panel de Diagnóstico
-      </h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-        <div class="bg-blue-800 rounded-lg p-3 border border-blue-600">
-          <div class="text-xs text-blue-300 mb-1">🔌 Estado Firebase</div>
-          <div class="font-bold text-base" id="firebaseStatus">🔄 Conectando...</div>
-        </div>
-        <div class="bg-blue-800 rounded-lg p-3 border border-blue-600">
-          <div class="text-xs text-blue-300 mb-1">📊 Reservas Cargadas</div>
-          <div class="font-bold text-base"><span id="totalReservas">0</span> reservas</div>
-        </div>
-        <div class="bg-blue-800 rounded-lg p-3 border border-blue-600">
-          <div class="text-xs text-blue-300 mb-1">⏰ Última Actualización</div>
-          <div class="font-bold text-sm" id="ultimaActualizacion">Nunca</div>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap gap-2">
-        <button id="btnRecargar" class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition-all font-semibold flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          Recargar Datos
-        </button>
-        
-        <button id="btnTestConexion" class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-500 transition-all font-semibold flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-          </svg>
-          Test Conexión
-        </button>
-        
-        <button id="btnDiagnostico" class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500 transition-all font-semibold flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          Ver Diagnóstico
-        </button>
-      </div>
-    </div>
-
     <!-- MENSAJE -->
     <div id="mensaje" class="hidden mb-4 p-4 rounded-lg text-white"></div>
 
@@ -98,6 +50,51 @@
 
     <!-- VISTA ADMIN -->
     <div id="vistaAdmin" class="hidden bg-slate-800 rounded-xl p-6 shadow-xl">
+      
+      <!-- PANEL DE DIAGNÓSTICO (SOLO VISIBLE PARA ADMIN) -->
+      <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-xl p-4 mb-6 shadow-lg border border-blue-700">
+        <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Panel de Diagnóstico
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <div class="bg-blue-800 rounded-lg p-3">
+            <div class="text-xs text-blue-300 mb-1">Estado Firebase</div>
+            <div class="font-bold text-base" id="firebaseStatus">🔄 Conectando...</div>
+          </div>
+          <div class="bg-blue-800 rounded-lg p-3">
+            <div class="text-xs text-blue-300 mb-1">Reservas Cargadas</div>
+            <div class="font-bold text-base">📊 <span id="totalReservas">0</span></div>
+          </div>
+          <div class="bg-blue-800 rounded-lg p-3">
+            <div class="text-xs text-blue-300 mb-1">Última Actualización</div>
+            <div class="font-bold text-sm" id="ultimaActualizacion">-</div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="window.recargarReservas()" class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500 transition-all font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Recargar Reservas
+          </button>
+          <button onclick="window.testConexion()" class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-500 transition-all font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            Test Conexión
+          </button>
+          <button onclick="window.verConsola()" class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-500 transition-all font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Ver Diagnóstico
+          </button>
+        </div>
+      </div>
+
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-white flex items-center gap-2">
           <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,11 +177,9 @@
 
     // Inicializar Firebase
     try {
-      console.log('🚀 Inicializando Firebase...');
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
-      document.getElementById('firebaseStatus').textContent = '✅ Conectado';
-      console.log('✅ Firebase inicializado correctamente');
+      console.log('✅ Firebase inicializado');
       
       // Cargar reservas inmediatamente
       cargarReservas();
@@ -196,38 +191,41 @@
       });
       
     } catch (error) {
-      document.getElementById('firebaseStatus').textContent = '❌ Error: ' + error.code;
-      console.error('❌ Error al inicializar Firebase:', error);
-      alert('❌ Error al conectar con Firebase:\n\n' + error.message);
+      console.error('❌ Error Firebase:', error);
+      alert('Error al conectar con Firebase. Revisa la consola.');
     }
 
-    // 📥 CARGAR RESERVAS
+    // 📥 FUNCIÓN PRINCIPAL: CARGAR RESERVAS
     async function cargarReservas() {
       try {
-        console.log('📥 Cargando reservas...');
+        console.log('📥 Cargando reservas desde Firebase...');
+        
         const reservasRef = collection(db, "reservas");
         const querySnapshot = await getDocs(reservasRef);
         
         reservas = [];
-        querySnapshot.forEach((documento) => {
-          const data = documento.data();
-          reservas.push({
-            id: documento.id,
-            fecha: data.fecha,
-            hora: data.hora,
-            cliente: data.cliente
+        
+        if (querySnapshot.empty) {
+          console.log('⚠️ No hay documentos en la colección');
+        } else {
+          querySnapshot.forEach((documento) => {
+            const data = documento.data();
+            reservas.push({
+              id: documento.id,
+              fecha: data.fecha,
+              hora: data.hora,
+              cliente: data.cliente
+            });
           });
-        });
+        }
         
         console.log(`✅ ${reservas.length} reservas cargadas`);
-        console.table(reservas);
         
-        // Actualizar UI
-        document.getElementById('totalReservas').textContent = reservas.length;
-        document.getElementById('firebaseStatus').textContent = `✅ Conectado (${reservas.length})`;
-        document.getElementById('ultimaActualizacion').textContent = new Date().toLocaleTimeString('es-ES');
-        
+        // Actualizar UI solo si el admin está activo
         if (vistaAdminActiva) {
+          document.getElementById('totalReservas').textContent = reservas.length;
+          document.getElementById('firebaseStatus').textContent = `✅ Conectado (${reservas.length})`;
+          document.getElementById('ultimaActualizacion').textContent = new Date().toLocaleTimeString('es-ES');
           mostrarReservasAdmin();
         }
         
@@ -237,8 +235,12 @@
         }
         
       } catch (error) {
-        console.error('❌ ERROR AL CARGAR:', error);
-        document.getElementById('firebaseStatus').textContent = '❌ Error: ' + error.code;
+        console.error('❌ ERROR AL CARGAR RESERVAS:', error);
+        
+        if (vistaAdminActiva) {
+          document.getElementById('firebaseStatus').textContent = '❌ Error: ' + error.code;
+          document.getElementById('totalReservas').textContent = 'ERROR';
+        }
         
         let mensajeError = '';
         if (error.code === 'permission-denied') {
@@ -246,25 +248,57 @@
         } else {
           mensajeError = 'Error: ' + error.message;
         }
+        
         alert(mensajeError);
       }
     }
 
-    // 🧪 TEST CONEXIÓN
-    async function testConexion() {
-      console.log('🧪 ===== TEST DE CONEXIÓN =====');
-      alert('🧪 Iniciando test...\n\nRevisa la consola (F12) para ver detalles');
+    // Exponer función globalmente
+    window.recargarReservas = cargarReservas;
+    
+    // 📋 FUNCIÓN DE DIAGNÓSTICO
+    window.verConsola = function() {
+      const diagnostico = `
+═══════════════════════════════════════
+🔍 DIAGNÓSTICO DEL SISTEMA
+═══════════════════════════════════════
+
+📱 ESTADO DE FIREBASE:
+  • App inicializada: ${app ? '✅ Sí' : '❌ No'}
+  • Base de datos: ${db ? '✅ Conectada' : '❌ Desconectada'}
+  • Proyecto: ${firebaseConfig.projectId}
+
+📊 DATOS EN MEMORIA:
+  • Reservas cargadas: ${reservas.length}
+  • Vista admin activa: ${vistaAdminActiva ? 'Sí' : 'No'}
+
+═══════════════════════════════════════
+
+${reservas.length > 0 ? '📋 RESERVAS ACTUALES:\n' + reservas.map((r, i) => `${i+1}. ${r.fecha} ${r.hora} - ${r.cliente}`).join('\n') : '⚠️ NO HAY RESERVAS CARGADAS'}
+
+═══════════════════════════════════════
+      `;
+      
+      console.log(diagnostico);
+      alert('📋 Diagnóstico generado\n\nRevisa la CONSOLA (presiona F12) para ver los detalles completos.');
+    };
+    
+    // 🧪 FUNCIÓN DE TEST
+    window.testConexion = async function() {
+      console.log('🧪 ========== TEST DE CONEXIÓN ==========');
+      alert('Iniciando test de conexión...\nRevisa la consola (F12) para ver los resultados');
       
       try {
-        console.log('1️⃣ Firebase App:', app);
-        console.log('2️⃣ Firestore DB:', db);
+        console.log('1️⃣ Verificando Firebase...');
+        console.log('   App:', app);
+        console.log('   DB:', db);
         
+        console.log('2️⃣ Intentando leer colección "reservas"...');
         const testRef = collection(db, "reservas");
-        console.log('3️⃣ Referencia:', testRef);
         
+        console.log('3️⃣ Ejecutando getDocs...');
         const snapshot = await getDocs(testRef);
-        console.log('4️⃣ Snapshot:', snapshot);
-        console.log('📊 Documentos encontrados:', snapshot.size);
+        console.log('   Número de documentos:', snapshot.size);
         
         if (snapshot.empty) {
           alert('⚠️ TEST RESULTADO:\n\nLa colección existe pero está VACÍA.\nNo hay reservas guardadas.');
@@ -283,38 +317,15 @@
           }
         }
         
+        console.log('✅ Test completado');
+        
       } catch (error) {
         console.error('❌ ERROR EN TEST:', error);
         alert(`❌ ERROR:\n\nCódigo: ${error.code}\nMensaje: ${error.message}\n\nVerifica las reglas de Firebase.`);
       }
-    }
+    };
 
-    // 📋 DIAGNÓSTICO
-    function verDiagnostico() {
-      const info = `
-═══════════════════════════════════════
-🔍 DIAGNÓSTICO DEL SISTEMA
-═══════════════════════════════════════
-
-📱 FIREBASE:
-  • App: ${app ? '✅ Inicializada' : '❌ No inicializada'}
-  • DB: ${db ? '✅ Conectada' : '❌ Desconectada'}
-  • Proyecto: ${firebaseConfig.projectId}
-
-📊 DATOS:
-  • Reservas en memoria: ${reservas.length}
-  • Vista admin: ${vistaAdminActiva ? 'Activa' : 'Inactiva'}
-
-${reservas.length > 0 ? '\n📋 RESERVAS:\n' + reservas.map((r, i) => `  ${i+1}. ${r.fecha} ${r.hora} - ${r.cliente}`).join('\n') : '  ⚠️ Sin reservas'}
-
-═══════════════════════════════════════
-      `;
-      
-      console.log(info);
-      alert('📋 Diagnóstico generado!\n\nRevisa la CONSOLA (F12) para ver toda la información.');
-    }
-
-    // 🎨 MOSTRAR RESERVAS ADMIN
+    // 🎨 MOSTRAR RESERVAS EN ADMIN
     function mostrarReservasAdmin() {
       const cont = document.getElementById('listaReservasAdmin');
       const contador = document.getElementById('contadorAdmin');
@@ -324,9 +335,13 @@ ${reservas.length > 0 ? '\n📋 RESERVAS:\n' + reservas.map((r, i) => `  ${i+1}.
       if (reservas.length === 0) {
         cont.innerHTML = `
           <div class='text-center py-12 border-2 border-dashed border-slate-600 rounded-lg'>
+            <svg class="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
             <p class='text-slate-400 text-lg font-semibold'>No hay reservas registradas</p>
-            <button onclick="location.reload()" class="mt-4 bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600">
-              🔄 Recargar
+            <p class='text-slate-500 text-sm mt-2'>Las reservas aparecerán aquí automáticamente</p>
+            <button onclick="window.recargarReservas()" class="mt-4 bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600">
+              🔄 Recargar Datos
             </button>
           </div>
         `;
@@ -357,7 +372,7 @@ ${reservas.length > 0 ? '\n📋 RESERVAS:\n' + reservas.map((r, i) => `  ${i+1}.
                   <span class='text-amber-300 font-bold text-lg'>🕐 ${r.hora}</span>
                   <span class='text-white font-semibold'>👤 ${r.cliente}</span>
                 </div>
-                <button onclick="eliminarReserva('${r.id}')" 
+                <button onclick="window.eliminarReserva('${r.id}')" 
                   class='bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-600 font-semibold'>
                   🗑️ Eliminar
                 </button>
@@ -385,7 +400,7 @@ ${reservas.length > 0 ? '\n📋 RESERVAS:\n' + reservas.map((r, i) => `  ${i+1}.
         return `
           <button 
             id='hora-${h.replace(':','-')}' 
-            onclick='${ocupado ? '' : `seleccionarHora("${h}")`}' 
+            onclick='${ocupado ? '' : `window.seleccionarHora("${h}")`}' 
             ${ocupado ? 'disabled' : ''} 
             class='py-3 rounded-lg font-semibold ${ocupado ? 'bg-red-900 text-red-300 cursor-not-allowed opacity-50' : 'bg-slate-700 text-white hover:bg-amber-500 hover:scale-105 transition-all'}'>
             ${ocupado ? '❌ ' : ''}${h}
@@ -465,6 +480,12 @@ ${reservas.length > 0 ? '\n📋 RESERVAS:\n' + reservas.map((r, i) => `  ${i+1}.
         document.getElementById('vistaCliente').classList.add('hidden');
         document.getElementById('vistaAdmin').classList.remove('hidden');
         document.getElementById('passwordInput').value = '';
+        
+        // Actualizar el panel de diagnóstico
+        document.getElementById('firebaseStatus').textContent = `✅ Conectado (${reservas.length})`;
+        document.getElementById('totalReservas').textContent = reservas.length;
+        document.getElementById('ultimaActualizacion').textContent = new Date().toLocaleTimeString('es-ES');
+        
         cargarReservas().then(() => mostrarReservasAdmin());
         mostrarMensaje('✅ Sesión iniciada', 'success');
       } else {
@@ -495,11 +516,6 @@ ${reservas.length > 0 ? '\n📋 RESERVAS:\n' + reservas.map((r, i) => `  ${i+1}.
     document.getElementById('passwordInput').addEventListener('keypress', e => { 
       if (e.key === 'Enter') iniciarSesionAdmin(); 
     });
-    
-    // Botones de diagnóstico
-    document.getElementById('btnRecargar').addEventListener('click', cargarReservas);
-    document.getElementById('btnTestConexion').addEventListener('click', testConexion);
-    document.getElementById('btnDiagnostico').addEventListener('click', verDiagnostico);
     
     const hoy = new Date();
     document.getElementById('fechaSeleccionada').min = hoy.toISOString().split('T')[0];
