@@ -92,6 +92,28 @@
             </svg>
             Ver Diagnóstico
           </button>
+          <button onclick="window.archivarPasadas()" class="bg-orange-600 px-4 py-2 rounded-lg hover:bg-orange-500 transition-all font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+            </svg>
+            Archivar Pasadas
+          </button>
+        </div>
+      </div>
+
+      <!-- ESTADÍSTICAS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-4 text-white">
+          <div class="text-sm opacity-90 mb-1">Citas Hoy</div>
+          <div class="text-3xl font-bold" id="citasHoy">0</div>
+        </div>
+        <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 text-white">
+          <div class="text-sm opacity-90 mb-1">Citas Esta Semana</div>
+          <div class="text-3xl font-bold" id="citasSemana">0</div>
+        </div>
+        <div class="bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl p-4 text-white">
+          <div class="text-sm opacity-90 mb-1">Total Activas</div>
+          <div class="text-3xl font-bold" id="citasActivas">0</div>
         </div>
       </div>
 
@@ -204,22 +226,38 @@
         const querySnapshot = await getDocs(reservasRef);
         
         reservas = [];
+        const ahora = new Date();
+        const hoy = ahora.toISOString().split('T')[0];
+        const horaActual = ahora.getHours() * 100 + ahora.getMinutes(); // Ej: 14:30 = 1430
         
         if (querySnapshot.empty) {
           console.log('⚠️ No hay documentos en la colección');
         } else {
           querySnapshot.forEach((documento) => {
             const data = documento.data();
-            reservas.push({
-              id: documento.id,
-              fecha: data.fecha,
-              hora: data.hora,
-              cliente: data.cliente
-            });
+            const fechaReserva = data.fecha;
+            const [h, m] = data.hora.split(':');
+            const horaReserva = parseInt(h) * 100 + parseInt(m);
+            
+            // Solo incluir reservas futuras o del día actual con hora futura
+            if (fechaReserva > hoy || (fechaReserva === hoy && horaReserva > horaActual)) {
+              reservas.push({
+                id: documento.id,
+                fecha: data.fecha,
+                hora: data.hora,
+                cliente: data.cliente
+              });
+            } else {
+              // Marcar para archivar (opcional, por ahora solo las excluimos)
+              console.log(`⏰ Reserva pasada: ${data.fecha} ${data.hora} - ${data.cliente}`);
+            }
           });
         }
         
-        console.log(`✅ ${reservas.length} reservas cargadas`);
+        console.log(`✅ ${reservas.length} reservas activas cargadas`);
+        
+        // Actualizar estadísticas
+        actualizarEstadisticas();
         
         // Actualizar UI solo si el admin está activo
         if (vistaAdminActiva) {
@@ -252,6 +290,71 @@
         alert(mensajeError);
       }
     }
+
+    // 📊 ACTUALIZAR ESTADÍSTICAS
+    function actualizarEstadisticas() {
+      const ahora = new Date();
+      const hoy = ahora.toISOString().split('T')[0];
+      
+      // Citas de hoy
+      const citasHoy = reservas.filter(r => r.fecha === hoy).length;
+      
+      // Citas de esta semana (de hoy hasta dentro de 7 días)
+      const dentroDeUnaSemana = new Date(ahora);
+      dentroDeUnaSemana.setDate(ahora.getDate() + 7);
+      const fechaLimite = dentroDeUnaSemana.toISOString().split('T')[0];
+      
+      const citasSemana = reservas.filter(r => r.fecha >= hoy && r.fecha <= fechaLimite).length;
+      
+      // Total activas
+      const citasActivas = reservas.length;
+      
+      if (vistaAdminActiva) {
+        document.getElementById('citasHoy').textContent = citasHoy;
+        document.getElementById('citasSemana').textContent = citasSemana;
+        document.getElementById('citasActivas').textContent = citasActivas;
+      }
+    }
+
+    // 🗑️ ARCHIVAR CITAS PASADAS
+    window.archivarPasadas = async function() {
+      if (!confirm('¿Archivar todas las citas pasadas?\n\nEsto eliminará permanentemente las reservas de fechas y horas anteriores.')) return;
+      
+      try {
+        const reservasRef = collection(db, "reservas");
+        const querySnapshot = await getDocs(reservasRef);
+        
+        const ahora = new Date();
+        const hoy = ahora.toISOString().split('T')[0];
+        const horaActual = ahora.getHours() * 100 + ahora.getMinutes();
+        
+        let eliminadas = 0;
+        const promesas = [];
+        
+        querySnapshot.forEach((documento) => {
+          const data = documento.data();
+          const fechaReserva = data.fecha;
+          const [h, m] = data.hora.split(':');
+          const horaReserva = parseInt(h) * 100 + parseInt(m);
+          
+          // Eliminar si es fecha pasada o hora pasada del día actual
+          if (fechaReserva < hoy || (fechaReserva === hoy && horaReserva <= horaActual)) {
+            promesas.push(deleteDoc(doc(db, "reservas", documento.id)));
+            eliminadas++;
+            console.log(`🗑️ Archivando: ${data.fecha} ${data.hora} - ${data.cliente}`);
+          }
+        });
+        
+        await Promise.all(promesas);
+        
+        mostrarMensaje(`✅ ${eliminadas} citas pasadas archivadas`, 'success');
+        await cargarReservas();
+        
+      } catch (error) {
+        console.error('❌ Error al archivar:', error);
+        mostrarMensaje('❌ Error al archivar: ' + error.message, 'error');
+      }
+    };
 
     // Exponer función globalmente
     window.recargarReservas = cargarReservas;
@@ -394,16 +497,41 @@ ${reservas.length > 0 ? '📋 RESERVAS ACTUALES:\n' + reservas.map((r, i) => `${
       horaSeleccionada = "";
 
       const horariosOcupados = reservas.filter(r => r.fecha === fecha).map(r => r.hora);
+      
+      // Verificar si es hoy para ocultar horas pasadas
+      const ahora = new Date();
+      const hoy = ahora.toISOString().split('T')[0];
+      const horaActualNum = ahora.getHours() * 100 + ahora.getMinutes(); // Ej: 14:30 = 1430
+      const esHoy = fecha === hoy;
 
       grid.innerHTML = HORARIOS.map(h => {
         const ocupado = horariosOcupados.includes(h);
+        const [hora, minuto] = h.split(':');
+        const horaNum = parseInt(hora) * 100 + parseInt(minuto);
+        const horaPasada = esHoy && horaNum <= horaActualNum;
+        
+        // Si es hora pasada o está ocupada, deshabilitar
+        const deshabilitado = ocupado || horaPasada;
+        
+        let claseBoton, textoBoton;
+        if (horaPasada) {
+          claseBoton = 'py-3 rounded-lg font-semibold bg-gray-800 text-gray-500 cursor-not-allowed opacity-40';
+          textoBoton = '⏰ ' + h;
+        } else if (ocupado) {
+          claseBoton = 'py-3 rounded-lg font-semibold bg-red-900 text-red-300 cursor-not-allowed opacity-50';
+          textoBoton = '❌ ' + h;
+        } else {
+          claseBoton = 'py-3 rounded-lg font-semibold bg-slate-700 text-white hover:bg-amber-500 hover:scale-105 transition-all';
+          textoBoton = h;
+        }
+        
         return `
           <button 
             id='hora-${h.replace(':','-')}' 
-            onclick='${ocupado ? '' : `window.seleccionarHora("${h}")`}' 
-            ${ocupado ? 'disabled' : ''} 
-            class='py-3 rounded-lg font-semibold ${ocupado ? 'bg-red-900 text-red-300 cursor-not-allowed opacity-50' : 'bg-slate-700 text-white hover:bg-amber-500 hover:scale-105 transition-all'}'>
-            ${ocupado ? '❌ ' : ''}${h}
+            onclick='${deshabilitado ? '' : `window.seleccionarHora("${h}")`}' 
+            ${deshabilitado ? 'disabled' : ''} 
+            class='${claseBoton}'>
+            ${textoBoton}
           </button>
         `;
       }).join('');
@@ -488,9 +616,32 @@ ${reservas.length > 0 ? '📋 RESERVAS ACTUALES:\n' + reservas.map((r, i) => `${
         
         cargarReservas().then(() => mostrarReservasAdmin());
         mostrarMensaje('✅ Sesión iniciada', 'success');
+        
+        // Programar limpieza automática a medianoche
+        programarLimpiezaMedianoche();
       } else {
         mostrarMensaje('❌ Contraseña incorrecta', 'error');
       }
+    }
+
+    // 🕐 PROGRAMAR LIMPIEZA AUTOMÁTICA A MEDIANOCHE
+    function programarLimpiezaMedianoche() {
+      const ahora = new Date();
+      const manana = new Date(ahora);
+      manana.setDate(manana.getDate() + 1);
+      manana.setHours(0, 0, 0, 0); // Medianoche
+      
+      const msHastaMedianoche = manana.getTime() - ahora.getTime();
+      
+      console.log(`⏰ Limpieza automática programada para: ${manana.toLocaleString('es-ES')}`);
+      console.log(`   (en ${Math.round(msHastaMedianoche / 1000 / 60)} minutos)`);
+      
+      setTimeout(async () => {
+        console.log('🕛 ¡Es medianoche! Archivando citas pasadas automáticamente...');
+        await window.archivarPasadas();
+        // Reprogramar para la próxima medianoche
+        programarLimpiezaMedianoche();
+      }, msHastaMedianoche);
     }
 
     function mostrarMensaje(txt, tipo) {
