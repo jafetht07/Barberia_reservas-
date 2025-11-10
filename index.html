@@ -100,7 +100,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const ADMIN_PASSWORD = "tuko123"; // CAMBIA ESTA CONTRASEÑA
+        const ADMIN_PASSWORD = "admin123"; // CAMBIA ESTA CONTRASEÑA
         const HORARIOS = [
             "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
             "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
@@ -111,6 +111,24 @@
         let reservas = [];
         let vistaAdminActiva = false;
         let horaSeleccionada = "";
+
+        // Cargar reservas al inicio
+        async function cargarReservasInicial() {
+            try {
+                const q = query(collection(db, "reservas"), orderBy("fecha"), orderBy("hora"));
+                const querySnapshot = await getDocs(q);
+                reservas = [];
+                querySnapshot.forEach((doc) => {
+                    reservas.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                console.log('Reservas cargadas:', reservas.length);
+            } catch (error) {
+                console.error('Error al cargar reservas:', error);
+            }
+        }
 
         // Escuchar cambios en tiempo real
         const q = query(collection(db, "reservas"), orderBy("fecha"), orderBy("hora"));
@@ -123,6 +141,8 @@
                 });
             });
             
+            console.log('Reservas actualizadas:', reservas.length);
+            
             // Actualizar vista si está en modo admin
             if (vistaAdminActiva) {
                 mostrarReservasAdmin();
@@ -133,12 +153,15 @@
             if (fecha) {
                 mostrarHorarios();
             }
+        }, (error) => {
+            console.error('Error en tiempo real:', error);
         });
 
         // Inicializar
-        function init() {
+        async function init() {
             configurarFechaMinima();
             configurarEventos();
+            await cargarReservasInicial();
         }
 
         function configurarFechaMinima() {
